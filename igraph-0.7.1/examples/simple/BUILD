@@ -43,7 +43,8 @@ cc_binary(
 	srcs = ["check-sparse-solver.cpp"],
 	includes = ["igraph.h", "igraph_sparsemat.h"],
 	deps= ["//src/finite-difference-arpack-igraph/igraph-0.7.1:igraph"],
-	copts = ["-Isrc/finite-difference-arpack-igraph/igraph-0.7.1/include"],
+	copts = ["-Isrc/finite-difference-arpack-igraph/igraph-0.7.1/include",
+	      	 "-fopenmp"],
 	linkopts = ["-fopenmp"],
 )
 
