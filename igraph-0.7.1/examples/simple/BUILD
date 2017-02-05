@@ -44,5 +44,6 @@ cc_binary(
 	includes = ["igraph.h", "igraph_sparsemat.h"],
 	deps= ["//src/finite-difference-arpack-igraph/igraph-0.7.1:igraph"],
 	copts = ["-Isrc/finite-difference-arpack-igraph/igraph-0.7.1/include"],
+	linkopts = ["-fopenmp"],
 )
 

@@ -1,6 +1,6 @@
 cc_library(
 	name = "igraph",
+	srcs = ["src/.libs/libigraph.so"],
 	hdrs = glob(["include/*.h"]),
-	linkopts = ["-ligraph"],
 	visibility = ["//visibility:public"],
 )
