@@ -777,14 +777,12 @@ solve_eigenproblem(unsigned i_L,
   igraph_sparsemat_t A_igraph, B_igraph;
   igraph_sparsemat_init(&A_igraph, n, n, system_matrix.n_rows);
 
-  std::cout << "(A_graph, irow) = ";
   for (unsigned i=0; i<system_matrix.n_rows; ++i) {
     igraph_sparsemat_entry(&A_igraph,
 			   locations(0,i),
 			   locations(1,i),
 			   system_matrix(i));
   }
-  std::cout << std::endl;
   igraph_sparsemat_compress(&A_igraph, &B_igraph);
   igraph_sparsemat_destroy(&A_igraph);
 
@@ -865,21 +863,6 @@ solve_eigenproblem(unsigned i_L,
     n_eig = np - 1;
   }
 
-  std::cout << "pcol = ";
-  for (int i=0; i<n+1; ++i) {
-    std::cout << pcol[i] << ",";
-  }
-  std::cout << std::endl;
-
-  std::cout << "(A, irow) = ";
-  for (int i=0; i<nnz; ++i) {
-    std::cout << "("
-	      << A[i] << ","
-	      << irow[i] << "), ";
-    
-  }
-  std::cout << std::endl;
-  
   ARluSymMatrix<double> matrix(n,
 			       nnz,
 			       A, irow, pcol, 'L');

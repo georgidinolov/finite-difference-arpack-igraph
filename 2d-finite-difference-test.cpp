@@ -16,7 +16,7 @@ int main ()
 
   unsigned seed = 3;
   int bm_order = 10000;
-  int order = 16;
+  int order = 64;
   double rho = 0.0;
   double sigma_x = 1.0;
   double sigma_y = 1.0;
