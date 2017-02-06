@@ -11,10 +11,10 @@ int main() {
 
   long int i;
   int j;
-  int dimension = 10000;
+  int dimension = 16000;
   
   /***********************************************************************/
-  int n_eigenproblems = 16;
+  int n_eigenproblems = 60;
   std::vector<igraph_sparsemat_t> system_mats_A (n_eigenproblems);
   std::vector<igraph_sparsemat_t> system_mats_B (n_eigenproblems);
   
@@ -41,7 +41,7 @@ int main() {
   }
 
     auto t1 = std::chrono::high_resolution_clock::now();
-    omp_set_dynamic(0);
+    omp_set_dynamic(1);
     printf("max number threads = %d\n", omp_get_max_threads());
 #pragma omp parallel for shared(system_mats_B) private(j)
   for (j=0; j<n_eigenproblems; j++) {
@@ -51,7 +51,7 @@ int main() {
     
     igraph_arpack_options_init(&options);
     options.n = dimension;
-    options.nev = 10;
+    options.nev = 20;
     options.ncv = 0;
     options.which[0] = 'L';
     options.which[1] = 'M';
