@@ -29,17 +29,11 @@ cc_library(
 	visibility = ["//visibility:public"],
 	deps = ["//src/finite-difference-arpack-igraph/igraph-0.7.1:igraph",
 	        "//src/finite-difference-arpack-version-2/arpackpp:arpackpp",	
-	        ":armadillo", ":pde-data-types"],
+	        "://src/armadillo-7.600.2:armadillo", ":pde-data-types"],
 	copts = ["-fopenmp",
-	      	 "-Isrc/finite-difference-arpack-version-2/",
-		 "-Isrc/finite-difference-arpack-igraph/igraph-0.7.1/include"],
+		 "-Isrc/finite-difference-arpack-igraph/igraph-0.7.1/include",
+		 "-Isrc/armadillo-7.600.2/usr/include"],
 	linkopts = ["-fopenmp"],
-)
-
-cc_library(
-	name = "armadillo",
-	linkopts = ["-larmadillo"],
-	copts = ["-O3"],
 )
 
 cc_library(
@@ -53,5 +47,7 @@ cc_library(
 	srcs = ["PDEDataTypes.cpp"],
 	hdrs = ["PDEDataTypes.hpp"],
 	visibility = ["//visibility:public"],
-	deps = [":armadillo"],
+	deps = ["//src/armadillo-7.600.2:armadillo"],
+	copts = ["-O3",
+		 "-Isrc/armadillo-7.600.2/usr/include"],
 )

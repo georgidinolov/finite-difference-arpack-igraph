@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <armadillo>
 #include <vector>
 #include "PDEDataTypes.hpp"
 
