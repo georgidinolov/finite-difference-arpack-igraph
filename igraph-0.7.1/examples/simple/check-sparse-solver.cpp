@@ -1,4 +1,4 @@
-extern "C" {
+nextern "C" {
 #include "igraph.h"
 #include "igraph_sparsemat.h"
 }
@@ -11,7 +11,7 @@ int main() {
 
   long int i;
   int j;
-  int dimension = 2000;
+  int dimension = 10000;
   
   /***********************************************************************/
   int n_eigenproblems = 16;
@@ -50,7 +50,7 @@ int main() {
     
     igraph_arpack_options_init(&options);
     options.n = dimension;
-    options.nev = 100;
+    options.nev = 10;
     options.ncv = 0;
     options.which[0] = 'L';
     options.which[1] = 'M';
