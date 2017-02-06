@@ -14,7 +14,7 @@ int main() {
   int dimension = 16000;
   
   /***********************************************************************/
-  int n_eigenproblems = 60;
+  int n_eigenproblems = 4;
   std::vector<igraph_sparsemat_t> system_mats_A (n_eigenproblems);
   std::vector<igraph_sparsemat_t> system_mats_B (n_eigenproblems);
   
