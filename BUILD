@@ -29,7 +29,7 @@ cc_library(
 	visibility = ["//visibility:public"],
 	deps = ["//src/finite-difference-arpack-igraph/igraph-0.7.1:igraph",
 	        "//src/finite-difference-arpack-version-2/arpackpp:arpackpp",	
-	        "://src/armadillo-7.600.2:armadillo", ":pde-data-types"],
+	        "//src/armadillo-7.600.2:armadillo", ":pde-data-types"],
 	copts = ["-fopenmp",
 		 "-Isrc/finite-difference-arpack-igraph/igraph-0.7.1/include",
 		 "-Isrc/armadillo-7.600.2/usr/include"],
