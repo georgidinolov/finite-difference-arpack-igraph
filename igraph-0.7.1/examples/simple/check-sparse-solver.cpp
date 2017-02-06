@@ -1,4 +1,4 @@
-nextern "C" {
+extern "C" {
 #include "igraph.h"
 #include "igraph_sparsemat.h"
 }
@@ -42,6 +42,7 @@ int main() {
 
     auto t1 = std::chrono::high_resolution_clock::now();
     omp_set_dynamic(0);
+    printf("max number threads = %d\n", omp_get_max_threads());
 #pragma omp parallel for shared(system_mats_B) private(j)
   for (j=0; j<n_eigenproblems; j++) {
     igraph_matrix_t vectors;
