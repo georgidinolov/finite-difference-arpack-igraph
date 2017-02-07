@@ -198,6 +198,7 @@ public:
   Eigenproblem(igraph_vector_t * eigenvalues_ptr,
 	       igraph_matrix_t * eigenvectors_ptr);
   ~Eigenproblem();
+  const igraph_vector_t * get_eigenvalues_ptr() const;
 private:
   igraph_vector_t* eigenvalues_ptr_;
   igraph_matrix_t* eigenvectors_ptr_;

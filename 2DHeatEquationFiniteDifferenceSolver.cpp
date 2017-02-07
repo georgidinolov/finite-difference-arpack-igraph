@@ -806,11 +806,19 @@ solve_eigenproblem(unsigned i_L,
   igraph_vector_print(&values);
   std::cout << std::endl;
 
-  Eigenproblem igraph_eigenproblem = Eigenproblem(&values,
-						  &vectors);
+  Eigenproblem * igraph_eigenproblem = new Eigenproblem(&values,
+							&vectors);
+
+  std::cout << "IN EIGENPROB" << std::endl;
+  std::cout << "from Eigenproblem: "
+	    << igraph_vector_e(igraph_eigenproblem->get_eigenvalues_ptr(),
+			       0)
+	    << std::endl;
+  std::cout << "from values: "
+	    << igraph_vector_e(&values, 0)
+	    << std::endl;
   
-  igraph_vector_destroy(&values);
-  igraph_matrix_destroy(&vectors);
+  delete igraph_eigenproblem;
   igraph_sparsemat_destroy(&B_igraph);
   // IGRAPH END
     
@@ -909,4 +917,9 @@ Eigenproblem::~Eigenproblem()
 {
   igraph_vector_destroy(eigenvalues_ptr_);
   igraph_matrix_destroy(eigenvectors_ptr_);
+}
+
+const igraph_vector_t * Eigenproblem::get_eigenvalues_ptr() const
+{
+  return eigenvalues_ptr_;
 }
