@@ -777,11 +777,24 @@ solve_eigenproblem(unsigned i_L,
   igraph_sparsemat_t A_igraph, B_igraph;
   igraph_sparsemat_init(&A_igraph, n, n, system_matrix.n_rows);
 
-  for (unsigned i=0; i<system_matrix.n_rows; ++i) {
-    igraph_sparsemat_entry(&A_igraph,
-			   locations(0,i),
-			   locations(1,i),
-			   system_matrix(i));
+  for (unsigned i=0; i<upper_diag_elements.n_rows; ++i) {
+    if (locations(0,upper_diag_elements(i)) ==
+  	locations(1,upper_diag_elements(i))) {
+      igraph_sparsemat_entry(&A_igraph,
+  			     locations(0,upper_diag_elements(i)),
+  			     locations(1,upper_diag_elements(i)),
+  			     system_matrix(upper_diag_elements(i)));
+    } else { 
+      igraph_sparsemat_entry(&A_igraph,
+  			     locations(0,upper_diag_elements(i)),
+  			     locations(1,upper_diag_elements(i)),
+  			     system_matrix(upper_diag_elements(i)));
+      
+      igraph_sparsemat_entry(&A_igraph,
+  			     locations(1,upper_diag_elements(i)),
+  			     locations(0,upper_diag_elements(i)),
+  			     system_matrix(upper_diag_elements(i)));
+    }
   }
   igraph_sparsemat_compress(&A_igraph, &B_igraph);
   igraph_sparsemat_destroy(&A_igraph);
@@ -807,16 +820,17 @@ solve_eigenproblem(unsigned i_L,
   std::cout << std::endl;
 
   Eigenproblem * igraph_eigenproblem = new Eigenproblem(&values,
-							&vectors);
+  							&vectors);
 
   std::cout << "IN EIGENPROB" << std::endl;
   std::cout << "from Eigenproblem: "
-	    << igraph_vector_e(igraph_eigenproblem->get_eigenvalues_ptr(),
-			       0)
-	    << std::endl;
+  	    << igraph_vector_e(igraph_eigenproblem->get_eigenvalues_ptr(),
+  			       0)
+  	    << std::endl;
   std::cout << "from values: "
-	    << igraph_vector_e(&values, 0)
-	    << std::endl;
+  	    << igraph_vector_e(&values, 0)
+  	    << std::endl;
+
   
   delete igraph_eigenproblem;
   igraph_sparsemat_destroy(&B_igraph);
@@ -922,4 +936,9 @@ Eigenproblem::~Eigenproblem()
 const igraph_vector_t * Eigenproblem::get_eigenvalues_ptr() const
 {
   return eigenvalues_ptr_;
+}
+
+const igraph_matrix_t * Eigenproblem::get_eigenvectors_ptr() const
+{
+  return eigenvectors_ptr_;
 }
