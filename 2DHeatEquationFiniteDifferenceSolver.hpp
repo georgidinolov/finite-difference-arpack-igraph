@@ -16,6 +16,10 @@
 //    f(a,b,c,d | x_T,y_T,T) = d^4 q / da db dc dd
 //
 
+extern "C" {
+#include "igraph.h"
+}
+
 #include <armadillo>
 #include <iostream>
 #include <vector>
@@ -188,3 +192,13 @@ private:
   bool check_data(int n, int* pcol, int* irow, char uplo) const;
 };
 
+class Eigenproblem
+{
+public:
+  Eigenproblem(igraph_vector_t * eigenvalues_ptr,
+	       igraph_matrix_t * eigenvectors_ptr);
+  ~Eigenproblem();
+private:
+  igraph_vector_t* eigenvalues_ptr_;
+  igraph_matrix_t* eigenvectors_ptr_;
+};

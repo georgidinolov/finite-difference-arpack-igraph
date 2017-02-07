@@ -805,6 +805,9 @@ solve_eigenproblem(unsigned i_L,
   
   igraph_vector_print(&values);
   std::cout << std::endl;
+
+  Eigenproblem igraph_eigenproblem = Eigenproblem(&values,
+						  &vectors);
   
   igraph_vector_destroy(&values);
   igraph_matrix_destroy(&vectors);
@@ -893,4 +896,17 @@ solve_eigenproblem(unsigned i_L,
   // }
 
   return eigenprob_ptr;
+}
+
+// EIGENPROBLEM CLASS //
+Eigenproblem::Eigenproblem(igraph_vector_t * eigenvalues_ptr,
+			   igraph_matrix_t * eigenvectors_ptr)
+  : eigenvalues_ptr_(eigenvalues_ptr),
+    eigenvectors_ptr_(eigenvectors_ptr)
+{}
+
+Eigenproblem::~Eigenproblem()
+{
+  igraph_vector_destroy(eigenvalues_ptr_);
+  igraph_matrix_destroy(eigenvectors_ptr_);
 }

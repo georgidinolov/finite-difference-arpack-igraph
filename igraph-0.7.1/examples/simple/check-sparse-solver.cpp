@@ -15,33 +15,37 @@ int main() {
   
   /***********************************************************************/
   int n_eigenproblems = 4;
-  std::vector<igraph_sparsemat_t> system_mats_A (n_eigenproblems);
   std::vector<igraph_sparsemat_t> system_mats_B (n_eigenproblems);
+  std::vector<igraph_sparsemat_t*> system_mats_B_ptr (n_eigenproblems);
   
   igraph_rng_seed(igraph_rng_default(), 42 * 42);
 
   for (j=0; j<n_eigenproblems; j++) {
-    igraph_sparsemat_init(&system_mats_A[j], dimension, dimension,
+    igraph_sparsemat_t A;
+    igraph_sparsemat_init(&A, dimension, dimension,
   			  dimension + 2*(dimension-1));
 
     for (i=0; i<dimension; i++) {
-      igraph_sparsemat_entry(&system_mats_A[j], i, i,
+      igraph_sparsemat_entry(&A, i, i,
   			     igraph_rng_get_integer(igraph_rng_default(),
   						    -10, 10));
       if (i > 0) {
   	int off_diagonal_entry = igraph_rng_get_integer(igraph_rng_default(),
   							-10, 10);
-  	igraph_sparsemat_entry(&system_mats_A[j], i-1, i, off_diagonal_entry);
-  	igraph_sparsemat_entry(&system_mats_A[j], i, i-1, off_diagonal_entry);
+  	igraph_sparsemat_entry(&A, i-1, i, off_diagonal_entry);
+  	igraph_sparsemat_entry(&A, i, i-1, off_diagonal_entry);
       }
     }
     
-    igraph_sparsemat_compress(&system_mats_A[j], &system_mats_B[j]);
-    igraph_sparsemat_destroy(&system_mats_A[j]);
+    igraph_sparsemat_compress(&A, &system_mats_B[j]);
+    igraph_sparsemat_destroy(&A);
+    system_mats_B_ptr[j] = &system_mats_B[j];
+    std::cout << "system_mats_B_ptr[" << j
+	      << "]= " << system_mats_B_ptr[j] << std::endl;
   }
 
     auto t1 = std::chrono::high_resolution_clock::now();
-    omp_set_dynamic(1);
+    omp_set_dynamic(0);
     printf("max number threads = %d\n", omp_get_max_threads());
 #pragma omp parallel for shared(system_mats_B) private(j)
   for (j=0; j<n_eigenproblems; j++) {
@@ -51,7 +55,7 @@ int main() {
     
     igraph_arpack_options_init(&options);
     options.n = dimension;
-    options.nev = 20;
+    options.nev = 10;
     options.ncv = 0;
     options.which[0] = 'L';
     options.which[1] = 'M';
@@ -68,12 +72,12 @@ int main() {
     igraph_arpack_storage_init(&storage, dimension, dimension, dimension, true);
     
     
-    igraph_sparsemat_arpack_rssolve(&system_mats_B[j], &options, &storage,
+    igraph_sparsemat_arpack_rssolve(system_mats_B_ptr[j], &options, &storage,
 				    &values, &vectors,
 				    IGRAPH_SPARSEMAT_SOLVE_LU);
     /* if (VECTOR(values)[0] != 1.0) { return 1; } */
     
-    //igraph_vector_print(&values); 
+    igraph_vector_print(&values); 
     
     igraph_vector_destroy(&values);
     igraph_matrix_destroy(&vectors);
