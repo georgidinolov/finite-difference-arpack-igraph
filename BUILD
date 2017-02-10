@@ -4,7 +4,8 @@ cc_binary(
 	includes = ["2DHeatEquationFiniteDifferenceSolver.hpp"],
 	deps = [":2d-heat-equation-finite-difference",
 	        "//src/brownian-motion:2d-brownian-motion"],
-	copts = ["-Isrc/igraph-0.7.1/include"],
+	copts = ["-Isrc/igraph-0.7.1/include",
+	         "-O3"],
 )
 
 cc_binary(
@@ -29,12 +30,11 @@ cc_library(
 	hdrs = ["2DHeatEquationFiniteDifferenceSolver.hpp"],
 	visibility = ["//visibility:public"],
 	deps = ["//src/igraph-0.7.1:igraph",
-	        "//src/finite-difference-arpack-version-2/arpackpp:arpackpp",	
 	        "//src/armadillo-7.600.2:armadillo", ":pde-data-types"],
 	copts = ["-fopenmp",
 		 "-Isrc/igraph-0.7.1/include",
-		 "-Isrc/finite-difference-arpack-version-2",
-		 "-Isrc/armadillo-7.600.2/usr/include"],
+		 "-Isrc/armadillo-7.600.2/usr/include",
+		 "-O3"],
 	linkopts = ["-fopenmp"],
 )
 

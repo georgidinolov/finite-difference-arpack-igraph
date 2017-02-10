@@ -16,7 +16,7 @@ int main ()
 
   unsigned seed = 3;
   int bm_order = 10000;
-  int order = 128;
+  int order = 64;
   double rho = 0.0;
   double sigma_x = 1.0;
   double sigma_y = 1.0;
@@ -52,15 +52,14 @@ int main ()
   // // double solution = finite_difference_solver->solve();
   // // std::cout << "solution = " << solution << std::endl;
 
-
   auto t1 = std::chrono::high_resolution_clock::now();
-  double likelihood = finite_difference_solver->solve();
+  double likelihood = finite_difference_solver->likelihood();
   auto t2 = std::chrono::high_resolution_clock::now();
   std::cout << "duration = "
   	    << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
   	    << " milliseconds\n";
-
   printf("likelihood = %.16e, N = %d\n", likelihood, order);
+  
   delete finite_difference_solver;
   return 0;
 }

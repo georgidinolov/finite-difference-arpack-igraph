@@ -27,6 +27,7 @@ extern "C" {
 
 template<class ARFLOAT>
 class ARluSymStdEig;
+class Eigenproblem;
 
 class TwoDHeatEquationFiniteDifferenceSolver
 {
@@ -155,7 +156,7 @@ private:
   arma::Mat<double> system_matrix_two_;
   arma::Mat<arma::uword> index_matrix_;
   arma::vec system_matrix_;
-  std::vector<ARluSymStdEig<double>*> eigenprobs_;
+  std::vector<Eigenproblem *> eigenprobs_;
 
   // Switches the role of x- and y-coordinates if necessary, then
   // scales the boundary data by sigma_x_ and sigma_y_, then scales
@@ -176,17 +177,17 @@ private:
   const SystemMatrices pre_calc_system_matrix(int i_L, int i_R, int j_L, int j_U) const;
 
   // solves the eigenvalue problem and stores it in the private member
-  ARluSymStdEig<double> * solve_eigenproblem(unsigned i_L, 
-					     unsigned i_R, 
-					     unsigned j_L, 
-					     unsigned j_U) const;
-
+  const Eigenproblem * solve_eigenproblem(unsigned i_L, 
+					  unsigned i_R, 
+					  unsigned j_L, 
+					  unsigned j_U) const;
+  
   // builds final matrix
   double solve_discretized_PDE(unsigned i_L, 
 			       unsigned i_R, 
 			       unsigned j_L, 
 			       unsigned j_U,
-			       ARluSymStdEig<double> * eigenproblem_ptr) const;
+			       const Eigenproblem * eigenproblem_ptr) const;
 
   int number_eigenvalues(double t_2, double Delta_cut) const;
   bool check_data(int n, int* pcol, int* irow, char uplo) const;
@@ -195,11 +196,15 @@ private:
 class Eigenproblem
 {
 public:
+  Eigenproblem();
   Eigenproblem(igraph_vector_t * eigenvalues_ptr,
 	       igraph_matrix_t * eigenvectors_ptr);
   ~Eigenproblem();
   const igraph_vector_t * get_eigenvalues_ptr() const;
   const igraph_matrix_t * get_eigenvectors_ptr() const;
+
+  const double get_eigenvalue(long int i) const;
+  const double get_eigenvector_elem(long int i, long int j) const;
   
 private:
   igraph_vector_t* eigenvalues_ptr_;

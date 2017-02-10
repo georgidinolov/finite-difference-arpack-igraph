@@ -20,10 +20,9 @@ extern "C" {
 #include "igraph_sparsemat.h"
 }
 
-#include "arpackpp/include/arlsmat.h"
-#include "arpackpp/include/arlssym.h"
 #include <algorithm>
 #include <armadillo>
+#include <cstddef>
 #include <chrono>
 #include <cmath>
 #include <ctime>
@@ -66,9 +65,14 @@ TwoDHeatEquationFiniteDifferenceSolver::TwoDHeatEquationFiniteDifferenceSolver()
     system_matrix_one_(arma::Mat<double>(1,1)),
     system_matrix_two_(arma::Mat<double>(1,1)),
     index_matrix_(arma::Mat<arma::uword>(1,1)),
-    system_matrix_(arma::vec(1)),
-    eigenprobs_(24)
+    system_matrix_(arma::vec(1))
 {
+  eigenprobs_ = std::vector<Eigenproblem *> ();
+  for (int i=0; i<24; ++i) {
+    Eigenproblem * new_prob = new Eigenproblem();
+    eigenprobs_.push_back(new_prob);
+  }
+  
   scale_data();
   quantize_data();
   pre_calc_S_matrices();
@@ -182,17 +186,17 @@ void TwoDHeatEquationFiniteDifferenceSolver::set_sigma_y(double sigma_y)
 
 double TwoDHeatEquationFiniteDifferenceSolver::solve() 
 {
-  ARluSymStdEig<double> * eigenproblem_ptr = 
+  const Eigenproblem * eigenproblem_ptr = 
     solve_eigenproblem(boundary_indeces_.get_i_L(),
 		       boundary_indeces_.get_i_R(),
 		       boundary_indeces_.get_j_L(),
 		       boundary_indeces_.get_j_U());
 
   double solution = solve_discretized_PDE(boundary_indeces_.get_i_L(),
-					  boundary_indeces_.get_i_R(),
-					  boundary_indeces_.get_j_L(),
-					  boundary_indeces_.get_j_U(),
-					  eigenproblem_ptr);
+  					  boundary_indeces_.get_i_R(),
+  					  boundary_indeces_.get_j_L(),
+  					  boundary_indeces_.get_j_U(),
+  					  eigenproblem_ptr);
   delete eigenproblem_ptr;
   return solution * correction_factor_;
 }
@@ -217,8 +221,8 @@ double TwoDHeatEquationFiniteDifferenceSolver::solve(double x_T,
 double TwoDHeatEquationFiniteDifferenceSolver::likelihood() 
 {
   std::vector<double> solutions = std::vector<double> (24);
-  std::vector<ARluSymStdEig<double>*> eigenproblem_ptr_vector = 
-    std::vector<ARluSymStdEig<double>*> (24);
+  std::vector<const Eigenproblem*> eigenproblem_ptr_vector = 
+    std::vector<const Eigenproblem*> (24);
   std::vector<int> k1s (24);
   std::vector<int> k2s (24);
   std::vector<int> k3s (24);
@@ -251,13 +255,14 @@ double TwoDHeatEquationFiniteDifferenceSolver::likelihood()
   	      indeces = {index};
   	    }
 
-	    ARluSymStdEig<double> * eigenproblem_ptr = 
+	    const Eigenproblem* eigenproblem_ptr =
 	      solve_eigenproblem(boundary_indeces_.get_i_L()-k1,
 				 boundary_indeces_.get_i_R()+k2,
 				 boundary_indeces_.get_j_L()-k3,
 				 boundary_indeces_.get_j_U()+k4);
 	    
 	    for (unsigned i=0; i<indeces.size(); ++i) {
+	      delete eigenproblem_ptr_vector[indeces[i]];
 	      eigenproblem_ptr_vector[indeces[i]] = eigenproblem_ptr;
 	    }
 
@@ -571,7 +576,7 @@ solve_discretized_PDE(unsigned i_L,
 		      unsigned i_R, 
 		      unsigned j_L, 
 		      unsigned j_U,
-		      ARluSymStdEig<double> * eigenproblem_ptr) const
+		      const Eigenproblem * eigenproblem_ptr) const
 {
   EigenproblemIndexing i_cum_i_beg = EigenproblemIndexing(i_L,
   							  i_R,
@@ -586,15 +591,16 @@ solve_discretized_PDE(unsigned i_L,
   if (n_eig >= np) {
     n_eig = np-1;
   }
+  
   arma::mat eigvec(np,n_eig);
   arma::vec eigval(n_eig);
 
   for (int i=0; i<n_eig; ++i) {
-    eigval(i) = eigenproblem_ptr->Eigenvalue(i);
+    eigval(i) = eigenproblem_ptr->get_eigenvalue(i);
     for (int j=0; j<np; ++j) {
-      eigvec(j,i) = eigenproblem_ptr->Eigenvector(i,j);
+      eigvec(j,i) = eigenproblem_ptr->get_eigenvector_elem(j,i);
     }
-  }  
+  }
 
   arma::vec exp_eigval(n_eig);
   for (int i=0; i<n_eig; ++i) {
@@ -618,11 +624,11 @@ solve_discretized_PDE(unsigned i_L,
   for (int i=0; i<n_I; ++i) {
     // std::cout << "(" << i0_m[i] << "," << j0_m[i] << ")" << std::endl;
     if (i0_m[i] > i_L &&
-	i0_m[i] < i_R &&
-	j0_m[i] > j_L &&
-	j0_m[i] < j_U) {
+  	i0_m[i] < i_R &&
+  	j0_m[i] > j_L &&
+  	j0_m[i] < j_U) {
       unsigned IC_index = i_cum(j0_m[i]-j_L-1) +
-	(i0_m[i] - i_beg(j0_m[i]-j_L-1))/2;
+  	(i0_m[i] - i_beg(j0_m[i]-j_L-1))/2;
       q_multiplier[IC_index] = q0_m[i];
     }
   }
@@ -638,11 +644,11 @@ solve_discretized_PDE(unsigned i_L,
   for (int i=0; i<n_II; ++i) {
     // std::cout << "(" << iT_m[i] << "," << jT_m[i] << ")" << std::endl;
     if (iT_m[i] > i_L &&
-	iT_m[i] < i_R &&
-	jT_m[i] > j_L &&
-	jT_m[i] < j_U) {
+  	iT_m[i] < i_R &&
+  	jT_m[i] > j_L &&
+  	jT_m[i] < j_U) {
       unsigned solution_index = i_cum(jT_m[i]-j_L-1) +
-	(iT_m[i] - i_beg(jT_m[i]-j_L-1))/2;
+  	(iT_m[i] - i_beg(jT_m[i]-j_L-1))/2;
       solution = solution + qT_m[i]*u_T[solution_index];
     }
   }
@@ -661,10 +667,9 @@ number_eigenvalues(double t_2, double Delta_cut) const
   for (int i=0; i<order_; ++i) {
     A1.row(i) = each_row.t();
   }
-  
-  arma::mat v = arma::reshape((1-rho_)/2.0 * A1 + 
-			      (1+rho_)/2.0 * A1.t(),
-			      square(order_), 1);
+
+  arma::mat v = arma::reshape((1-rho_)/2.0 * A1 + (1+rho_)/2.0 * A1.t(),
+  			      square(order_), 1);
   int n_eig = 0;
   double cutoff = 1 + Delta_cut/(2.0*square(pi())*t_2);
 
@@ -725,7 +730,7 @@ number_eigenvalues(double t_2, double Delta_cut) const
 //   return true;
 // }
 
-ARluSymStdEig<double> * TwoDHeatEquationFiniteDifferenceSolver::
+const Eigenproblem * TwoDHeatEquationFiniteDifferenceSolver::
 solve_eigenproblem(unsigned i_L, 
 		   unsigned i_R, 
 		   unsigned j_L, 
@@ -760,18 +765,15 @@ solve_eigenproblem(unsigned i_L,
   int n = np;
   int nnz = upper_diag_elements.n_rows;
 
-  int* irow = new int[nnz];
-  int* pcol = new int[n+1];
-  double* A = new double[nnz];
-
-  std::cout << "n = " << n << std::endl;
-  std::cout << "nnz = " << nnz << std::endl;
-  std::cout << "system_matrix.n_rows = "
-	    << system_matrix.n_rows << std::endl;
+  // NUMBER EIGENVALUES 
+  int n_eig = number_eigenvalues(scaled_data_.get_t(), 36);
+  if (n_eig >= np) {
+    n_eig = np - 1;
+  }
 
   // ########### IGRAPH START ###########
-  igraph_matrix_t vectors;
-  igraph_vector_t values;
+  igraph_matrix_t * vectors = new igraph_matrix_t;
+  igraph_vector_t * values = new igraph_vector_t;
   igraph_arpack_options_t options;
   
   igraph_sparsemat_t A_igraph, B_igraph;
@@ -801,7 +803,7 @@ solve_eigenproblem(unsigned i_L,
 
   igraph_arpack_options_init(&options);
   options.n = n;
-  options.nev = 6;
+  options.nev = n_eig;
   options.ncv = 0;
   options.which[0] = 'L';
   options.which[1] = 'M';
@@ -809,118 +811,33 @@ solve_eigenproblem(unsigned i_L,
   options.sigma = 1;
   options.tol = 1e-16;
 
-  igraph_vector_init(&values, options.nev);
-  igraph_matrix_init(&vectors, options.n, options.n);
+  igraph_vector_init(values, options.nev);
+  igraph_matrix_init(vectors, options.n, options.nev);
 
   igraph_sparsemat_arpack_rssolve(&B_igraph, &options, /*storage=*/ 0,
-  				  &values, &vectors, IGRAPH_SPARSEMAT_SOLVE_LU);
+  				  values, vectors, IGRAPH_SPARSEMAT_SOLVE_LU);
 
-  
-  igraph_vector_print(&values);
-  std::cout << std::endl;
-
-  Eigenproblem * igraph_eigenproblem = new Eigenproblem(&values,
-  							&vectors);
-
-  std::cout << "IN EIGENPROB" << std::endl;
-  std::cout << "from Eigenproblem: "
-  	    << igraph_vector_e(igraph_eigenproblem->get_eigenvalues_ptr(),
-  			       0)
-  	    << std::endl;
-  std::cout << "from values: "
-  	    << igraph_vector_e(&values, 0)
-  	    << std::endl;
-
-  
-  delete igraph_eigenproblem;
+  Eigenproblem * eigenproblem_ptr = new Eigenproblem(values,
+						     vectors);
   igraph_sparsemat_destroy(&B_igraph);
   // IGRAPH END
     
-  unsigned current_row = locations(0,0);
-  int column_counter = 0;
-  int column_size_counter = 0;
-  pcol[column_counter] = 0; // the first element in A is the beginning of the first column
-
-  for (unsigned i=0; i<upper_diag_elements.n_rows; ++i) {
-    if (current_row != locations(0,upper_diag_elements(i))) {
-      if (column_size_counter == 1) {
-	A[i-1] = system_matrix(upper_diag_elements(i-1));
-	irow[i-1] = locations(1,upper_diag_elements(i-1));
-      } else if (column_size_counter == 2) {
-	A[i-2] = system_matrix(upper_diag_elements(i-2));	
-	A[i-1] = system_matrix(upper_diag_elements(i-1));
-
-	irow[i-2] = locations(1,upper_diag_elements(i-2));	
-	irow[i-1] = locations(1,upper_diag_elements(i-1));
-      } else if (column_size_counter == 3) {
-	A[i-3] = system_matrix(upper_diag_elements(i-3));	
-	A[i-2] = system_matrix(upper_diag_elements(i-1));
-	A[i-1] = system_matrix(upper_diag_elements(i-2));
-
-	irow[i-3] = locations(1,upper_diag_elements(i-3));	
-	irow[i-2] = locations(1,upper_diag_elements(i-1));
-	irow[i-1] = locations(1,upper_diag_elements(i-2));	
-      } else if (column_size_counter == 0) {
-	// nothing happens at the beginning of the loop.
-      } else {
-	// TODO(georgid): Throw an exception!!
-      }
-
-      current_row = locations(0,upper_diag_elements(i));
-      column_counter++;
-      pcol[column_counter] = i;
-      column_size_counter = 1;
-
-    } else {
-      column_size_counter++;
-    }
-
-    if (i == upper_diag_elements.n_rows-1) {
-      A[i] = system_matrix(upper_diag_elements(i));
-      irow[i] = locations(1,upper_diag_elements(i));	
-    }
-  }
-
-  pcol[column_counter+1]=nnz;
-
-  int n_eig = number_eigenvalues(scaled_data_.get_t(), 36);
-  if (n_eig >= np) {
-    n_eig = np - 1;
-  }
-
-  ARluSymMatrix<double> matrix(n,
-			       nnz,
-			       A, irow, pcol, 'L');
-
-  ARluSymStdEig<double> * eigenprob_ptr = 
-    new  ARluSymStdEig<double>(n_eig, matrix, 1.0, "LM", 0, 1e-16);
-  eigenprob_ptr->FindEigenvectors();
-
-  for (int i=0; i<n_eig; ++i) {
-    std::cout << eigenprob_ptr->Eigenvalue(i)
-	      << ",";
-  }
-  std::cout << std::endl;
-
-  delete [] irow;
-  delete [] pcol;
-  delete [] A;
-
-  // for (unsigned i=0; i<indeces.size(); ++i) {
-  //   if (eigenprobs_[indeces[i]] == nullptr) {
-  //     eigenprobs_[indeces[i]] = eigenprob_ptr;
-  //   } else {
-  //     if (i==0) {
-  // 	delete eigenprobs_[indeces[i]];	
-  //     } 
-  //     eigenprobs_[indeces[i]] = eigenprob_ptr;
-  //   }
-  // }
-
-  return eigenprob_ptr;
+  return eigenproblem_ptr;
 }
 
 // EIGENPROBLEM CLASS //
+Eigenproblem::Eigenproblem()
+{
+  igraph_vector_t eigvals;
+  igraph_matrix_t eigvecs;
+
+  igraph_vector_init(&eigvals, 1);
+  igraph_matrix_init(&eigvecs, 1, 1);
+
+  eigenvalues_ptr_ = &eigvals;
+  eigenvectors_ptr_ = &eigvecs;
+}
+
 Eigenproblem::Eigenproblem(igraph_vector_t * eigenvalues_ptr,
 			   igraph_matrix_t * eigenvectors_ptr)
   : eigenvalues_ptr_(eigenvalues_ptr),
@@ -941,4 +858,15 @@ const igraph_vector_t * Eigenproblem::get_eigenvalues_ptr() const
 const igraph_matrix_t * Eigenproblem::get_eigenvectors_ptr() const
 {
   return eigenvectors_ptr_;
+}
+
+const double Eigenproblem::get_eigenvalue(long int i) const
+{
+  return igraph_vector_e(eigenvalues_ptr_, i);
+}
+
+const double Eigenproblem::get_eigenvector_elem(long int i,
+						long int j) const
+{
+  return igraph_matrix_e(eigenvectors_ptr_, i, j);
 }
