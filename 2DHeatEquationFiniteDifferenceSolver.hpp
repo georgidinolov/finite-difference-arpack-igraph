@@ -100,6 +100,7 @@ public:
   void set_switch_x_y();
   void set_sigma_x(double sigma_x);
   void set_sigma_y(double sigma_y);
+  void set_order(int order);
 
   // the solution to the heat equation at (x_T,y_T) for time T
   double solve();

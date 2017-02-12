@@ -184,6 +184,11 @@ void TwoDHeatEquationFiniteDifferenceSolver::set_sigma_y(double sigma_y)
   pre_calc_S_matrices();
 }
 
+void TwoDHeatEquationFiniteDifferenceSolver::set_order(int order)
+{
+  order_ = order;
+}
+
 double TwoDHeatEquationFiniteDifferenceSolver::solve() 
 {
   const Eigenproblem * eigenproblem_ptr = 
@@ -504,16 +509,6 @@ void TwoDHeatEquationFiniteDifferenceSolver::quantize_data()
 							  j_L,
 							  j_U,
 							  order_);
-
-    std::cout << "initial_condition: "
-	      << initial_condition;
-    std::cout << "final_condition: "
-	      << final_condition;
-    std::cout << "(i_L, i_R, j_L, j_U) = "
-	    << "(" << i_L << ", "
-	    << i_R << ", "
-	    << j_L << ", "
-	    << j_U << ")" << std::endl;
 
   quantized_discrete_data_ = 
     DiscreteProblemData(initial_condition, final_condition);
