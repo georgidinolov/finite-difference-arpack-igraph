@@ -140,6 +140,7 @@ std::ostream& operator<<(std::ostream& output_stream,
 			 const PointInterpolation& point_interpolation) 
 {
   output_stream << "n_I=" << point_interpolation.n_I_ << ",\n";
+  output_stream << "case = " << point_interpolation.case_ << ",\n";
   output_stream << "(i_m, j_m, q_m) = " << ",\n";
   for (int i=0; i<point_interpolation.n_I_; ++i) {
     output_stream << point_interpolation.i_m_[i] << ", " 

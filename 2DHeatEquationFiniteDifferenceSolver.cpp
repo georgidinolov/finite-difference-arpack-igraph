@@ -496,7 +496,7 @@ void TwoDHeatEquationFiniteDifferenceSolver::quantize_data()
 							    j_L,
 							    j_U,
 							    order_);
-
+  
   PointInterpolation final_condition = PointInterpolation(x_T,
 							  y_T,
 							  i_L,
@@ -504,6 +504,16 @@ void TwoDHeatEquationFiniteDifferenceSolver::quantize_data()
 							  j_L,
 							  j_U,
 							  order_);
+
+    std::cout << "initial_condition: "
+	      << initial_condition;
+    std::cout << "final_condition: "
+	      << final_condition;
+    std::cout << "(i_L, i_R, j_L, j_U) = "
+	    << "(" << i_L << ", "
+	    << i_R << ", "
+	    << j_L << ", "
+	    << j_U << ")" << std::endl;
 
   quantized_discrete_data_ = 
     DiscreteProblemData(initial_condition, final_condition);
