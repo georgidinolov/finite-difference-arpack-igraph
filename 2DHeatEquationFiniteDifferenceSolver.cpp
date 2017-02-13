@@ -77,7 +77,7 @@ TwoDHeatEquationFiniteDifferenceSolver::TwoDHeatEquationFiniteDifferenceSolver()
   quantize_data();
 
   if (boundary_indeces_.get_j_U() < 3) {
-    order_ = 2*order;
+    order_ = 2*64;
     scale_data();
     quantize_data();
   }
