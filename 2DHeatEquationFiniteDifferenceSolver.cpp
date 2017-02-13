@@ -75,6 +75,13 @@ TwoDHeatEquationFiniteDifferenceSolver::TwoDHeatEquationFiniteDifferenceSolver()
   
   scale_data();
   quantize_data();
+
+  if (boundary_indeces_.get_j_U() < 3) {
+    order_ = 2*order;
+    scale_data();
+    quantize_data();
+  }
+  
   pre_calc_S_matrices();
 }
 
@@ -112,6 +119,13 @@ TwoDHeatEquationFiniteDifferenceSolver(int order,
   scale_data();
   // Step 3 in the write-up
   quantize_data();
+
+  while (boundary_indeces_.get_j_U() < 3) {
+    order_ = 2*order_;
+    scale_data();
+    quantize_data();
+  }
+  
   pre_calc_S_matrices();
 }
 
