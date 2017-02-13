@@ -164,6 +164,12 @@ TwoDHeatEquationFiniteDifferenceSolver::~TwoDHeatEquationFiniteDifferenceSolver(
 //   return sigma_y_;
 // }
 
+const BoundaryIndeces& TwoDHeatEquationFiniteDifferenceSolver::
+get_boundary_indeces() const
+{
+  return boundary_indeces_;
+}
+
 void TwoDHeatEquationFiniteDifferenceSolver::set_switch_x_y()
 {
   if ( (original_data_.get_b() - original_data_.get_a())/
@@ -835,9 +841,29 @@ solve_eigenproblem(unsigned i_L,
   igraph_vector_init(values, options.nev);
   igraph_matrix_init(vectors, options.n, options.nev);
 
-  igraph_sparsemat_arpack_rssolve(&B_igraph, &options, /*storage=*/ 0,
-  				  values, vectors, IGRAPH_SPARSEMAT_SOLVE_LU);
-
+  igraph_set_error_handler(igraph_error_handler_printignore);
+  int result = igraph_sparsemat_arpack_rssolve(&B_igraph,
+					   &options,
+					   /*storage=*/ 0,
+					   values,
+					   vectors,
+					   IGRAPH_SPARSEMAT_SOLVE_LU);
+  int counter = 0;
+  while (result == IGRAPH_ARPACK_NOSHIFT && counter < 100) {
+    counter = counter + 1;
+    std::cout << "result = "
+	      << result
+	      << "; counter = "
+	      << counter
+	      << std::endl;
+    result = igraph_sparsemat_arpack_rssolve(&B_igraph,
+					   &options,
+					   /*storage=*/ 0,
+					   values,
+					   vectors,
+					   IGRAPH_SPARSEMAT_SOLVE_LU);
+  }
+  
   Eigenproblem * eigenproblem_ptr = new Eigenproblem(values,
 						     vectors);
   igraph_sparsemat_destroy(&B_igraph);

@@ -96,6 +96,7 @@ public:
 
   // double get_sigma_x() const;
   // double get_sigma_y() const;
+  const BoundaryIndeces& get_boundary_indeces() const;
 
   void set_switch_x_y();
   void set_sigma_x(double sigma_x);
