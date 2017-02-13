@@ -201,6 +201,8 @@ void TwoDHeatEquationFiniteDifferenceSolver::set_sigma_y(double sigma_y)
 void TwoDHeatEquationFiniteDifferenceSolver::set_order(int order)
 {
   order_ = order;
+  quantize_data();
+  pre_calc_S_matrices();
 }
 
 double TwoDHeatEquationFiniteDifferenceSolver::solve() 
