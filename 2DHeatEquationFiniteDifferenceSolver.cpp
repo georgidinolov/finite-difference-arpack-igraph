@@ -28,6 +28,7 @@ extern "C" {
 #include <ctime>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <omp.h>
 #include <vector>
 #include "2DHeatEquationFiniteDifferenceSolver.hpp"
@@ -168,6 +169,36 @@ const BoundaryIndeces& TwoDHeatEquationFiniteDifferenceSolver::
 get_boundary_indeces() const
 {
   return boundary_indeces_;
+}
+
+void TwoDHeatEquationFiniteDifferenceSolver::save_data_point() const
+{
+  std::ostringstream name;
+  name << order_ << "-"
+       << sigma_x_ << "-"
+       << sigma_y_ << "-"
+       << rho_ << "-"
+       << original_data_.get_a() << "-"
+       << original_data_.get_b() << "-"
+       << original_data_.get_c() << "-"
+       << original_data_.get_d();
+  std::string output_file_name = "bad-data-points/bad-data-point-" + name.str() + ".txt";
+  std::ofstream output_file;
+  output_file.open(output_file_name);
+  output_file << "order,sigma_x,sigma_y,rho,x_0,y_0,a_x,x_T,b_x,a_y,y_T,b_y\n";
+  output_file << order_ << ","
+	      << sigma_x_ << ","
+	      << sigma_y_ << ","
+	      << rho_ << ","
+	      << original_data_.get_x_0() << ","
+    	      << original_data_.get_y_0() << ","
+	      << original_data_.get_a() << ","
+	      << original_data_.get_x_T() << ","
+    	      << original_data_.get_b() << ","
+    	      << original_data_.get_c() << ","
+    	      << original_data_.get_y_T() << ","
+    	      << original_data_.get_d() << "\n";
+  output_file.close();
 }
 
 void TwoDHeatEquationFiniteDifferenceSolver::set_switch_x_y()

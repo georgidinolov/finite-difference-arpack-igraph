@@ -2,6 +2,7 @@
 #include <chrono>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <thread>
 #include <vector>
 #include <gsl/gsl_sf_exp.h>
@@ -59,6 +60,7 @@ int main ()
   	    << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
   	    << " milliseconds\n";
   printf("likelihood = %.16e, N = %d\n", likelihood, order);
+  finite_difference_solver->save_data_point();
   
   delete finite_difference_solver;
   return 0;
