@@ -428,10 +428,20 @@ void TwoDHeatEquationFiniteDifferenceSolver::scale_data() {
   double scaled_T = original_data_.get_t() /
     square(scaled_b_1 - scaled_a_1);
 
+  std::cout << "scaled_b - scaled_a = " 
+	    << scaled_b - scaled_a << std::endl;
+
+  std::cout << "scaled_d - scaled_c = " 
+	    << scaled_d - scaled_c << std::endl;
+
   correction_factor_ = 1.0 / 
-    (pow(scaled_b_1 - scaled_a_1,6)*
-     pow(sigma_x,3)*
-     pow(sigma_y,3));
+    (pow(scaled_b_1 - scaled_a_1, 
+	 6)*
+     pow(sigma_x_/sqrt(2), 3)*
+     pow(sigma_y_/sqrt(2), 3));
+
+  std::cout << "correction_factor_ = " 
+	    << correction_factor_ << std::endl;
 
   scaled_data_ = ContinuousProblemData(scaled_x_T,
 				       scaled_y_T,

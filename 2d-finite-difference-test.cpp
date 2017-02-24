@@ -11,32 +11,28 @@
 
 using namespace std;
 
-int main ()
+int main(int argc, char *argv[])
 {
+  if (argc < 12) {
+    printf("You must provide input\n");
+    printf("The input is: \n int order of numerical accuracy (try 32, 64, or 128 for now); \n sigma_x, \n sigma_y, \n rho,\n t,\n a,\n x_T,\n b,\n c,\n y_T,\n d\n"); 
+    exit(0);
+  }
+
   TwoDHeatEquationFiniteDifferenceSolver *finite_difference_solver;
 
-  unsigned seed = 3;
-  int bm_order = 10000;
-  int order = 64;
-  double rho = 0.0;
-  double sigma_x = 1.0;
-  double sigma_y = 1.0;
-  double t = 1;
-
-  BrownianMotion BM = BrownianMotion(seed,
-				     bm_order,
-				     rho,
-				     sigma_x,
-				     sigma_y,
-				     0,
-				     0,
-				     t);
-  double a = BM.get_a();
-  double b = BM.get_b();
-  double c = BM.get_c();
-  double d = BM.get_d();
-  double x = BM.get_x_T();
-  double y = BM.get_y_T();
+  int order = std::stoi(argv[1]);
+  double sigma_x = std::stod(argv[2]);
+  double sigma_y = std::stod(argv[3]);
+  double rho = std::stod(argv[4]);
+  double t = std::stod(argv[5]);
+  double a = std::stod(argv[6]);
+  double x = std::stod(argv[7]);
+  double b = std::stod(argv[8]);
+    
+  double c = std::stod(argv[9]);
+  double y = std::stod(argv[10]);
+  double d = std::stod(argv[11]);
 
   printf("(%f,%f,%f) x (%f,%f,%f)\n",a,x,b,c,y,d);
 
@@ -54,12 +50,12 @@ int main ()
   // // std::cout << "solution = " << solution << std::endl;
 
   auto t1 = std::chrono::high_resolution_clock::now();
-  double likelihood = finite_difference_solver->likelihood();
+  double solution = finite_difference_solver->solve();
   auto t2 = std::chrono::high_resolution_clock::now();
   std::cout << "duration = "
   	    << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
   	    << " milliseconds\n";
-  printf("likelihood = %.16e, N = %d\n", likelihood, order);
+  printf("solution = %.16e, N = %d\n", solution, order);
   finite_difference_solver->save_data_point();
   
   delete finite_difference_solver;
