@@ -43,6 +43,10 @@ namespace{
   inline double pi() {
     return std::atan(1)*4;
   }
+
+  inline double round_delta(double input, double delta) {
+    return delta * std::round(input/delta);
+  }
 }
 
 TwoDHeatEquationFiniteDifferenceSolver::TwoDHeatEquationFiniteDifferenceSolver()
@@ -407,32 +411,37 @@ void TwoDHeatEquationFiniteDifferenceSolver::scale_data() {
   double scaled_c_1 = original_data_.get_c() / sigma_y;
   double scaled_d_1 = original_data_.get_d() / sigma_y;
 
+  double Delta = (scaled_b_1 - scaled_a_1)/32.0;
+
   double scaled_x_T = scaled_x_T_1 / 
     (scaled_b_1 - scaled_a_1);
+   scaled_x_T = round_delta(scaled_x_T, Delta);
   double scaled_x_0 = scaled_x_0_1 / 
     (scaled_b_1 - scaled_a_1);
   double scaled_a = scaled_a_1 / 
     (scaled_b_1 - scaled_a_1);
   double scaled_b = scaled_b_1 / 
     (scaled_b_1 - scaled_a_1);
-
   double scaled_y_T = scaled_y_T_1 / 
     (scaled_b_1 - scaled_a_1);
+   scaled_y_T = round_delta(scaled_y_T, Delta);
   double scaled_y_0 = scaled_y_0_1 / 
     (scaled_b_1 - scaled_a_1);
   double scaled_c = scaled_c_1 / 
     (scaled_b_1 - scaled_a_1);
   double scaled_d = scaled_d_1 / 
     (scaled_b_1 - scaled_a_1);
+   scaled_d = round_delta(scaled_d, Delta);
+
 
   double scaled_T = original_data_.get_t() /
     square(scaled_b_1 - scaled_a_1);
 
-  std::cout << "scaled_b - scaled_a = " 
-	    << scaled_b - scaled_a << std::endl;
+  // std::cout << "scaled_b - scaled_a = " 
+  // 	    << scaled_b - scaled_a << std::endl;
 
-  std::cout << "scaled_d - scaled_c = " 
-	    << scaled_d - scaled_c << std::endl;
+  // std::cout << "scaled_d - scaled_c = " 
+  // 	    << scaled_d - scaled_c << std::endl;
 
   correction_factor_ = 1.0 / 
     (pow(scaled_b_1 - scaled_a_1, 
@@ -440,8 +449,8 @@ void TwoDHeatEquationFiniteDifferenceSolver::scale_data() {
      pow(sigma_x_/sqrt(2), 3)*
      pow(sigma_y_/sqrt(2), 3));
 
-  std::cout << "correction_factor_ = " 
-	    << correction_factor_ << std::endl;
+  // std::cout << "correction_factor_ = " 
+  // 	    << correction_factor_ << std::endl;
 
   scaled_data_ = ContinuousProblemData(scaled_x_T,
 				       scaled_y_T,
@@ -484,6 +493,7 @@ void TwoDHeatEquationFiniteDifferenceSolver::quantize_data()
   int j_L = 1;
   int j_U = std::floor((d-0.5*h)/h);
   double alpha = (j_U + 1.5) - d/h;
+  alpha = 0;
 
   std::vector<double> x_0_i_L_h = {x_0, i_L*h};
   double max_x_0_i_L_h = *std::max_element(std::begin(x_0_i_L_h),

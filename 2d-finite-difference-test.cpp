@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
   // // std::cout << "solution = " << solution << std::endl;
 
   auto t1 = std::chrono::high_resolution_clock::now();
-  double solution = finite_difference_solver->solve();
+  double solution = finite_difference_solver->likelihood();
   auto t2 = std::chrono::high_resolution_clock::now();
   std::cout << "duration = "
   	    << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
