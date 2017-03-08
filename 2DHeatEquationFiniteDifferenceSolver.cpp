@@ -411,11 +411,8 @@ void TwoDHeatEquationFiniteDifferenceSolver::scale_data() {
   double scaled_c_1 = original_data_.get_c() / sigma_y;
   double scaled_d_1 = original_data_.get_d() / sigma_y;
 
-  double Delta = (scaled_b_1 - scaled_a_1)/32.0;
-
   double scaled_x_T = scaled_x_T_1 / 
     (scaled_b_1 - scaled_a_1);
-   scaled_x_T = round_delta(scaled_x_T, Delta);
   double scaled_x_0 = scaled_x_0_1 / 
     (scaled_b_1 - scaled_a_1);
   double scaled_a = scaled_a_1 / 
@@ -424,15 +421,12 @@ void TwoDHeatEquationFiniteDifferenceSolver::scale_data() {
     (scaled_b_1 - scaled_a_1);
   double scaled_y_T = scaled_y_T_1 / 
     (scaled_b_1 - scaled_a_1);
-   scaled_y_T = round_delta(scaled_y_T, Delta);
   double scaled_y_0 = scaled_y_0_1 / 
     (scaled_b_1 - scaled_a_1);
   double scaled_c = scaled_c_1 / 
     (scaled_b_1 - scaled_a_1);
   double scaled_d = scaled_d_1 / 
     (scaled_b_1 - scaled_a_1);
-   scaled_d = round_delta(scaled_d, Delta);
-
 
   double scaled_T = original_data_.get_t() /
     square(scaled_b_1 - scaled_a_1);
