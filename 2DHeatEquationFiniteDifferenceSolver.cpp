@@ -576,6 +576,12 @@ void TwoDHeatEquationFiniteDifferenceSolver::quantize_data()
 							  j_U,
 							  order_);
 
+  std::cout << "initial_condition = "
+	    << initial_condition << std::endl;
+
+  std::cout << "final_condition = "
+	    << final_condition << std::endl;
+
   quantized_discrete_data_ = 
     DiscreteProblemData(initial_condition, final_condition);
 
