@@ -1,6 +1,6 @@
 cc_binary(
 	name = "2d-finite-difference-test",
-	srcs = ["2d-finite-difference-test.cpp"],
+	srcs = ["finite-difference-test.cpp"],
 	includes = ["2DHeatEquationFiniteDifferenceSolver.hpp"],
 	deps = [":2d-heat-equation-finite-difference",
 	        "//src/brownian-motion:2d-brownian-motion"],
