@@ -487,7 +487,6 @@ void TwoDHeatEquationFiniteDifferenceSolver::quantize_data()
   int j_L = 1;
   int j_U = std::floor((d-0.5*h)/h);
   double alpha = (j_U + 1.5) - d/h;
-  alpha = 0;
 
   std::vector<double> x_0_i_L_h = {x_0, i_L*h};
   double max_x_0_i_L_h = *std::max_element(std::begin(x_0_i_L_h),
