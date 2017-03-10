@@ -169,6 +169,12 @@ TwoDHeatEquationFiniteDifferenceSolver::~TwoDHeatEquationFiniteDifferenceSolver(
 //   return sigma_y_;
 // }
 
+const ContinuousProblemData& TwoDHeatEquationFiniteDifferenceSolver::
+get_quantized_continuous_data() const
+{
+  return quantized_continuous_data_;
+}
+
 const BoundaryIndeces& TwoDHeatEquationFiniteDifferenceSolver::
 get_boundary_indeces() const
 {
@@ -509,7 +515,6 @@ void TwoDHeatEquationFiniteDifferenceSolver::quantize_data()
 			  std::end(y0jLh));
   y_T = *std::max_element(std::begin(yTjLh),
 			  std::end(yTjLh));
-
   
   std::vector<double> y0diff_dist_1 = {y_0-j_U*h,0};
   std::vector<double> yTdiff_dist_1 = {y_T-j_U*h,0};
@@ -575,12 +580,6 @@ void TwoDHeatEquationFiniteDifferenceSolver::quantize_data()
 							  j_L,
 							  j_U,
 							  order_);
-
-  std::cout << "initial_condition = "
-	    << initial_condition << std::endl;
-
-  std::cout << "final_condition = "
-	    << final_condition << std::endl;
 
   quantized_discrete_data_ = 
     DiscreteProblemData(initial_condition, final_condition);

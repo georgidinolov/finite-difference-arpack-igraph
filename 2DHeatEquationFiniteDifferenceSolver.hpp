@@ -96,6 +96,7 @@ public:
 
   // double get_sigma_x() const;
   // double get_sigma_y() const;
+  const ContinuousProblemData& get_quantized_continuous_data() const;
   const BoundaryIndeces& get_boundary_indeces() const;
   void save_data_point() const;
 
