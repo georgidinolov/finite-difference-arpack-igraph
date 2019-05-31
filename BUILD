@@ -50,6 +50,5 @@ cc_library(
 	hdrs = ["PDEDataTypes.hpp"],
 	visibility = ["//visibility:public"],
 	deps = ["//src/armadillo-7.600.2:armadillo"],
-	copts = ["-O3",
-		 "-Isrc/armadillo-7.600.2/usr/include"],
+	copts = ["-O3"],
 )

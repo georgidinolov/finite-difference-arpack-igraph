@@ -1,4 +1,4 @@
-#include "armadillo"
+#include "src/armadillo-7.600.2/include/armadillo"
 #include <iostream>
 #include <vector>
 #include <string>
